@@ -795,7 +795,7 @@ install_v2ray() {
       colorEcho ${GREEN} "dominio ${V2_DOMAIN} es correcta y la instalación comenzará pronto "
       break
     else
-      colorEcho ${RED} "El nombre de dominio $ {V2_DOMAIN} se analizó incorrectamente (yes: continuar, no: volver,quit: salir) "
+      colorEcho ${RED} "El nombre de dominio ${V2_DOMAIN} se analizó incorrectamente (yes: continuar, no: volver,quit: salir) "
       read -rp "Selecione? (yes/no/quit) " forceConfirm
       case "${forceConfirm}" in
         [yY]|[yY][eE][sS] ) break ;;
