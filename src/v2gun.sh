@@ -99,7 +99,7 @@ urlDecode() {
 }
 
 continue_prompt() {
-  read -rp "继续其他操作 (yes/no)? " choice
+  read -rp "Continuar (yes/no)? " choice
   case "${choice}" in
     [yY]|[yY][eE][sS] ) return 0 ;;
     * ) exit 0;;
@@ -113,15 +113,15 @@ build_web() {
     wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O /tmp/template.zip
     ${sudoCmd} mkdir -p /var/www/html
     ${sudoCmd} unzip -q /tmp/template.zip -d /var/www/html
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
   else
     echo "Dummy website existed. Skip building."
   fi
 }
 
 checkIP() {
-  local realIP4="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip4_api` -m 5)"
-  local realIP6="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip6_api` -m 5)"
+  local realIP4="$(curl -s `curl -s https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/custom/ip4_api` -m 5)"
+  local realIP6="$(curl -s `curl -s https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/custom/ip6_api` -m 5)"
   local resolvedIP4="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
   local resolvedIP6="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
 
@@ -147,14 +147,14 @@ show_links() {
     printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
     echo ""
 
-    colorEcho ${BLUE} "VMess (新版分享格式)"
+    colorEcho ${BLUE} "VMess (Nuevo formato para compartir) "
     # https://github.com/v2ray/discussion/issues/720
     local uri_vmess_cf="ws+tls:${uuid}-1@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
     local uri_vmess="ws+tls:${uuid}-1@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
     printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
     echo ""
 
-    colorEcho ${BLUE} "VMess (旧版分享格式)"
+    colorEcho ${BLUE} "VMess (Formato de uso compartido versión anterior) "
     local json_vmess_cf="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_vmess_2dust_cf="$(printf %s "${json_vmess_cf}" | base64 --wrap=0)"
     local json_vmess="{\"add\":\"${sni}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
@@ -171,7 +171,7 @@ show_links() {
     local uri_trojango="${uuid}@${sni}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     local uri_trojango_cf="${uuid}@${cf_node}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
-    colorEcho ${YELLOW} "因 Trojan-Go 分享链接格式尚未定案，若您的客户端无法解析此链接，请手动填写连接信息"
+    colorEcho ${YELLOW} "Debido a que el formato del enlace para compartir\n de Trojan-Go no se ha finalizado,\n si su cliente no puede analizar este enlace,\n complete la información de conexión manualmente "
     printf "%s:443 %s %s\n" "${sni}" "${uuid}" "${path}tj"
     echo ""
 
@@ -537,8 +537,8 @@ EOF
   ]
 }
 EOF
-  ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/03_routing.json -O /usr/local/etc/v2ray/03_routing.json
-  ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json -O /usr/local/etc/v2ray/06_outbounds.json
+  ${sudoCmd} wget -q https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/config/03_routing.json -O /usr/local/etc/v2ray/03_routing.json
+  ${sudoCmd} wget -q https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json -O /usr/local/etc/v2ray/06_outbounds.json
 }
 
 set_trojan() {
@@ -728,13 +728,13 @@ get_caddy() {
 fix_cert() {
   if [ -f "/usr/local/bin/v2ray" ]; then
     while true; do
-      read -rp "解析到本 VPS 的域名: " V2_DOMAIN
+      read -rp "Resolver Dominio: " V2_DOMAIN
       if checkIP "${V2_DOMAIN}"; then
-        colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
+        colorEcho ${GREEN} "El nombre de dominio ${V2_DOMAIN} se resolvió correctamente y el certificado se reparará pronto "
         break
       else
-        colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
-        read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
+        colorEcho ${RED} "El primer nombre ${V2_DOMAIN} se ha analizado incorrectamente (yes:seguir,no:volver,quit:salir) "
+        read -rp "Selecionar? (yes/no/quit) " forceConfirm
         case "${forceConfirm}" in
           [yY]|[yY][eE][sS] ) break ;;
           [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
@@ -771,32 +771,32 @@ fix_cert() {
     write_json /usr/local/etc/v2ray/05_inbounds_vless.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-      colorEcho ${GREEN} "证书修复成功!"
+      colorEcho ${GREEN} "¡El certificado se restauró correctamente! "
       show_links
     else
       get_cert_alt "${V2_DOMAIN}"
       if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-        colorEcho ${GREEN} "证书修复成功!"
+        colorEcho ${GREEN} "¡El certificado se restauró correctamente! "
         show_links
       else
-        colorEcho ${RED} "证书签发失败, 请重试"
+        colorEcho ${RED} "Error de certificado, inténte de nuevo "
         exit 1
       fi
     fi
   else
-    colorEcho ${YELLOW} "请先安装 V2Ray"
+    colorEcho ${YELLOW} "Primero instale V2Ray "
   fi
 }
 
 install_v2ray() {
   while true; do
-    read -rp "解析到本 VPS 的域名: " V2_DOMAIN
+    read -rp "Ingresa Dominio De tu vps: " V2_DOMAIN
     if checkIP "${V2_DOMAIN}"; then
-      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
+      colorEcho ${GREEN} "dominio ${V2_DOMAIN} es correcta y la instalación comenzará pronto "
       break
     else
-      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
-      read -rp "若您确定域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit) " forceConfirm
+      colorEcho ${RED} "El nombre de dominio $ {V2_DOMAIN} se analizó incorrectamente (yes: continuar, no: volver,quit: salir) "
+      read -rp "Selecione? (yes/no/quit) " forceConfirm
       case "${forceConfirm}" in
         [yY]|[yY][eE][sS] ) break ;;
         [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
@@ -820,7 +820,7 @@ install_v2ray() {
 
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
-  local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
+  local cf_node="$(curl -s https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
   colorEcho ${BLUE} "Setting v2ray"
   set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
@@ -863,20 +863,20 @@ install_v2ray() {
   if [ -f "/usr/local/bin/v2ray" ]; then
     get_cert "${V2_DOMAIN}"
   else
-    colorEcho ${RED} "v2ray-core 下载失败, 可能会影响证书申请, 请先确保您的机器能访问 githubusercontent 再运行本脚本"
+    colorEcho ${RED} "v2ray-core si La descarga falla, lo que puede afectar la aplicación del certificado,\n asegúrese de que su máquina pueda acceder a githubusercontent antes de ejecutar este script "
     exit 1
   fi
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
+    colorEcho ${GREEN} "instalar VLESS + VMess + Trojan + NaiveProxy!"
     show_links
   else
     get_cert_alt "${V2_DOMAIN}"
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-      colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
+      colorEcho ${GREEN} "instalar VLESS + VMess + Trojan + NaiveProxy !"
       show_links
     else
-      colorEcho ${RED} "证书签发失败, 请运行修复证书"
+      colorEcho ${RED} "Error en la emisión del certificado,\n ejecute para reparar el certificado "
     fi
   fi
 }
@@ -884,12 +884,12 @@ install_v2ray() {
 edit_cf_node() {
   if [ -f "/usr/local/bin/v2ray" ]; then
   local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
-  printf "%s\n" "输入编号使用建议值"
+  printf "%s\n" "ingrese el numero"
   printf "1. %s\n" "icook.hk"
   printf "2. %s\n" "www.digitalocean.com"
   printf "3. %s\n" "www.garmin.com"
   printf "4. %s\n" "amp.cloudflare.com"
-  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
+  read -p "nueva dirección del nodo CF [enter (default) ${cf_node_current}]: " cf_node_new
   case "${cf_node_new}" in
     "1") cf_node_new="icook.hk" ;;
     "2") cf_node_new="www.digitalocean.com" ;;
@@ -901,40 +901,43 @@ edit_cf_node() {
   fi
   write_json /usr/local/etc/v2ray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
   sleep 1
-  printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
+  printf "%s\n" "CF El nodo ha sido cambiado a ${cf_node_new}"
   show_links
   fi
 }
 
 vps_tools() {
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} wget -y
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/vps_tools.sh -O /tmp/vps_tools.sh && bash /tmp/vps_tools.sh
+  wget -q https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/master/tools/vps_tools.sh -O /tmp/vps_tools.sh && bash /tmp/vps_tools.sh
   exit 0
 }
 
 rm_v2gun() {
   if [ -f "/usr/local/bin/v2ray" ]; then
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh -O /tmp/rm_v2gun.sh && bash /tmp/rm_v2gun.sh
+    wget -q https://raw.githubusercontent.com/lacasitamx/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh -O /tmp/rm_v2gun.sh && bash /tmp/rm_v2gun.sh
     exit 0
   fi
 }
 
 show_menu() {
   echo ""
-  echo "----------安装代理----------"
-  echo "1) 安装 VLESS + VMess + Trojan + NaiveProxy"
-  echo "2) 修复证书 / 更换域名"
-  echo "3) 自定义 Cloudflare 节点"
-  echo "----------显示配置----------"
-  echo "4) 显示链接"
-  echo "----------组件管理----------"
-  echo "5) 更新 v2ray-core"
-  echo "6) 更新 trojan-go"
-  echo "7) 更新 naiveproxy"
-  echo "----------实用工具----------"
-  echo "8) VPS 工具箱 (含 BBR 脚本)"
-  echo "----------卸载脚本----------"
-  echo "9) 卸载脚本与全部组件"
+  echo "----------MENÚ DE INSTALACION----------"
+echo ""
+  echo "1) Install VLESS + VMess + Trojan + NaiveProxy"
+  echo "2) Reparar certificado/cambiar nombre de dominio "
+  echo "3) Nodo Cloudflare personalizado "
+  echo "----------Configuración de pantalla ----------"
+  echo "4) Mostrar enlace "
+  echo "----------Gestión de componentes ---------- "
+  echo "5) Actualizar v2ray-core "
+  echo "6) Actualizar trojan-go "
+  echo "7) Actualizar naiveproxy "
+  echo "----------Utilidades ---------- "
+  echo "8) herramientas VPS (incluido el BBR) "
+  echo "----------Desinstalar secuencia de comandos ---------- "
+  echo "9) Desinstalar script y todos los componentes "
+ echo "----------SALIR---------- "
+ echo "0) SALIR DEL SCRIPT"
   echo ""
 }
 
@@ -948,7 +951,7 @@ menu() {
 
   while true; do
     show_menu
-    read -rp "选择操作 [输入任意值退出]: " opt
+    read -rp "[Selecione Una Opcion]: " opt
     case "${opt}" in
       "1") install_v2ray && continue_prompt ;;
       "2") fix_cert && continue_prompt ;;
@@ -959,6 +962,7 @@ menu() {
       "7") get_naiveproxy && continue_prompt ;;
       "8") vps_tools ;;
       "9") rm_v2gun ;;
+	 "0") exit ;;
       *) break ;;
     esac
   done
